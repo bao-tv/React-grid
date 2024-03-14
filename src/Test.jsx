@@ -2,54 +2,94 @@ import React, { useState } from 'react';
 import GridLayout, { WidthProvider, Responsive } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import '../node_modules/bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
-const ResponsiveGridLayout = WidthProvider(Responsive);
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import Modal from './Modal.tsx';
+const ResponsiveGridLayout = WidthProvider(GridLayout);
 
 const Test = () => {
-    const [state, setState] = useState([
-        { i: "1", x: 0, y: 0, w: 1, h: 1, static: true, data:{id: 1, name: 1, barcode: 1 } },
-        { i: "2", x: 1, y: 0, w: 1, h: 1, data:{id: 2, name: 2, barcode: 2 } },
-        { i: "3", x: 0, y: 1, w: 1, h: 1, data:{id: 3, name: 3, barcode: 3 } }
-    ]);
-
-    console.log('bao state: ', state);
+    const [state, setState] = useState([]);
+    // console.log('bao state: ', state);
+    const availableHandles = ["s", "w", "e", "n", "sw", "nw", "se", "ne"];
+    const [show, setShow] = useState(false);
     
-    const handleAdd = () => {
-        setState(prevState => {
-            const newItem = { i: prevState.length + 1, x: prevState.length % 2 === 0 ? 0 : 1, y: 1, w: 1, h: 1, data:{id: prevState.length + 1, name: prevState.length + 1, barcode: prevState.length + 1 } };
-            return [...prevState, newItem];
-        });
-    }
+    const handleAdd = (dataForm) => {
+        console.log('dataForm: ', dataForm);
+        if (dataForm.i === '') {
+            setState(prevState => {
+                const newItem = {
+                    i: `${prevState.length + 1}`,
+                    x: 0,
+                    y: 0,
+                    w: +dataForm.width || 15,
+                    h: +dataForm.height || 1,
+                    resizeHandles: availableHandles,
+                    data: { i: prevState.length + 1, name: dataForm?.name, barcode: prevState.length + 1 }
+                };
+                return [...prevState, newItem];
+            });
+        } else {
+            setState(prevState => {
+                const updatedState = prevState.map(ele => {
+                    if (ele.i === dataForm.i) {
+                        return {
+                            i: dataForm.i,
+                            x: 0,
+                            y: 0,
+                            w: +dataForm.width || 15,
+                            h: +dataForm.height || 1,
+                            resizeHandles: availableHandles,
+                            data: { i: dataForm.i, name: dataForm?.name, barcode: prevState.length + 1 }
+                        };
+                    } else {
+                        return ele;
+                    }
+                });
+                return updatedState;
+            });
+        }
+        setShow(false);
+    };
 
     const onLayoutChange = (layout, layouts) => {
-        console.log(layouts)
+        console.log(layout)
       }
+    const handeShowBale = (dataBale) => {
+        console.log('bao handeShowBale: ', dataBale)
+        setShow({
+            i: dataBale.i,
+            name: dataBale.data.name,
+            width: dataBale.w,
+            height: dataBale.h,
+        });
+    }
 
     return (
         <>
             <header>GTAS BALE LAYOUT</header>
             <div>
-                <button type="button" className="btn btn-primary" onClick={handleAdd}>ADD</button>
-                <div className='container w-25'>
+                <button type="button" className="btn btn-primary" onClick={() => setShow(true)}>ADD</button>
+                <div className='container' style={{width : '420px'}}>
                     <ResponsiveGridLayout
                         className="layout border border-dark-subtle rounded"
                         layout={state}
-                        rowHeight={120}
-                        width={300}
+                        rowHeight={40}
+                        width={400}
                         onLayoutChange={(layout, layouts) => onLayoutChange(layout, layouts)}
-                        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-                        cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+                        cols={30}
+                        
                     >
                         {state.map(item => (
-                            <div key={item.i} style={{ border: '1px solid' }} data-grid={item}>
-                                <p>ID: <span>{item.data.id}</span></p>
-                                <p>Name: <span>{item.data.id}</span></p>
-                                <p>Barcode: <span>{item.data.id}{item.data.id}{item.data.id}</span></p>
+                            <div key={item.i} style={{ border: '1px solid' }} onClick={() => handeShowBale(item)}>
+                                <div className='p-1'>
+                                    <p className='m-0' style={{fontSize: '12px'}}>ID: <span>{item.data.i}</span></p>
+                                    <p className='m-0' style={{fontSize: '12px'}}>Name: <span>{item.data.name}</span></p>
+                                </div>
                             </div>
                         ))}
                     </ResponsiveGridLayout>
                 </div>
             </div>
+            <Modal show={show} setShow={setShow} handleAdd={handleAdd}/>
         </>
     )
 }
