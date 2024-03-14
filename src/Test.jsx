@@ -4,11 +4,12 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import Modal from './Modal.tsx';
+import { debounce } from 'lodash';
 const ResponsiveGridLayout = WidthProvider(GridLayout);
 
 const Test = () => {
     const [state, setState] = useState([]);
-    // console.log('bao state: ', state);
+    console.log('bao state: ', state.length);
     const availableHandles = ["s", "w", "e", "n", "sw", "nw", "se", "ne"];
     const [show, setShow] = useState(false);
     
@@ -65,28 +66,36 @@ const Test = () => {
 
     return (
         <>
-            <header>GTAS BALE LAYOUT</header>
-            <div>
-                <button type="button" className="btn btn-primary" onClick={() => setShow(true)}>ADD</button>
-                <div className='container' style={{width : '420px'}}>
-                    <ResponsiveGridLayout
-                        className="layout border border-dark-subtle rounded"
-                        layout={state}
-                        rowHeight={40}
-                        width={400}
-                        onLayoutChange={(layout, layouts) => onLayoutChange(layout, layouts)}
-                        cols={30}
-                        
-                    >
-                        {state.map(item => (
-                            <div key={item.i} style={{ border: '1px solid' }} onClick={() => handeShowBale(item)}>
-                                <div className='p-1'>
-                                    <p className='m-0' style={{fontSize: '12px'}}>ID: <span>{item.data.i}</span></p>
-                                    <p className='m-0' style={{fontSize: '12px'}}>Name: <span>{item.data.name}</span></p>
-                                </div>
+            <div className='container m-auto'>
+                <div className="row">
+                    <header className='d-flex justify-content-center'>GTAS BALE LAYOUT</header>
+                    <div>
+                        <div className='d-flex justify-content-end'>
+                            <button type="button" className="btn btn-primary" onClick={() => setShow(true)}>ADD BALE</button>
+                        </div>
+                        {state.length ? (
+                            <div className='container' style={{width : '420px'}}>
+                                <ResponsiveGridLayout
+                                    className="layout border border-dark-subtle rounded"
+                                    layout={state}
+                                    rowHeight={40}
+                                    width={400}
+                                    onLayoutChange={(layout, layouts) => onLayoutChange(layout, layouts)}
+                                    cols={30}
+                                    
+                                >
+                                    {state.map(item => (
+                                        <div key={item.i} style={{ border: '1px solid' }} onDoubleClick={() => handeShowBale(item)}>
+                                            <div className='p-1'>
+                                                <p className='m-0' style={{fontSize: '12px'}}>ID: <span>{item.data.i}</span></p>
+                                                <p className='m-0' style={{fontSize: '12px'}}>Name: <span>{item.data.name}</span></p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </ResponsiveGridLayout>
                             </div>
-                        ))}
-                    </ResponsiveGridLayout>
+                        ): ''}
+                    </div>
                 </div>
             </div>
             <Modal show={show} setShow={setShow} handleAdd={handleAdd}/>
